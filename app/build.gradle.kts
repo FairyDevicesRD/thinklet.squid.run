@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "ai.fd.thinklet.app.squid.run"
-        minSdk = 26
+        minSdk = 27
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
