@@ -1,0 +1,13 @@
+[versions]
+sdk-audio = "0.1.2"
+sdk-gesture = "0.1.2"
+sdk-led = "0.1.2"
+sdk-maintenance = "0.1.2"
+sdk-utils = "0.1.0"
+
+[libraries]
+sdk-audio = { group = "ai.fd.thinklet", name = "sdk-audio", version.ref = "sdk-audio" }
+sdk-gesture = { group = "ai.fd.thinklet", name = "sdk-gesture", version.ref = "sdk-gesture" }
+sdk-led = { group = "ai.fd.thinklet", name = "sdk-led", version.ref = "sdk-led" }
+sdk-maintenance = { group = "ai.fd.thinklet", name = "sdk-maintenance", version.ref = "sdk-maintenance" }
+sdk-utils = { group = "ai.fd.thinklet", name = "sdk-utils", version.ref = "sdk-utils" }
