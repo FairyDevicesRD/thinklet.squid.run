@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.VibrationEffect.DEFAULT_AMPLITUDE
 import android.os.Vibrator
+import android.view.KeyEvent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -58,6 +59,13 @@ class MainActivity : AppCompatActivity() {
                 .flowWithLifecycle(lifecycle)
                 .collect {
                     binding.streaming.text = it.toString()
+                }
+        }
+        lifecycleScope.launch {
+            viewModel.latestStreamingEventList
+                .flowWithLifecycle(lifecycle)
+                .collect {
+                    binding.streamingEvents.text = it.asReversed().joinToString("\n")
                 }
         }
     }

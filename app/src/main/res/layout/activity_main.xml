@@ -182,4 +182,23 @@
         app:layout_constraintTop_toTopOf="@id/label_streaming"
         tools:text="true" />
 
+    <TextView
+        android:id="@+id/title_streaming_events"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/streaming_events"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/label_streaming" />
+
+    <TextView
+        android:id="@+id/streaming_events"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title_streaming_events"
+        tools:text="event1\nevent2" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

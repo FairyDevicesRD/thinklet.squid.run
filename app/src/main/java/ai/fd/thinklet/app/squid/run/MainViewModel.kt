@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.Application
 import android.content.pm.PackageManager
 import android.os.Build
-import android.util.Log
 import androidx.annotation.MainThread
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
@@ -13,9 +12,16 @@ import com.pedro.common.ConnectChecker
 import com.pedro.library.generic.GenericStream
 import com.pedro.library.util.sources.audio.MicrophoneSource
 import com.pedro.library.util.sources.video.Camera2Source
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.runningFold
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class MainViewModel(
     private val application: Application,
@@ -39,6 +45,19 @@ class MainViewModel(
     private val _isStreaming: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isStreaming: StateFlow<Boolean> = _isStreaming.asStateFlow()
 
+    private val streamingEventMutableSharedFlow: MutableSharedFlow<StreamingEvent> =
+        MutableSharedFlow(replay = 10, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+
+    val latestStreamingEventList: Flow<List<String>> = streamingEventMutableSharedFlow
+        .map { DateTimeFormatter.ISO_LOCAL_TIME.format(it.timestamp) + " " + it.message }
+        .runningFold(ArrayList(STREAMING_EVENT_BUFFER_SIZE)) { acc, value ->
+            acc.add(value)
+            if (acc.size > STREAMING_EVENT_BUFFER_SIZE) {
+                acc.removeAt(0)
+            }
+            acc
+        }
+
     private var stream: GenericStream? = null
 
     fun isAllPermissionGranted(): Boolean = REQUIRED_PERMISSIONS.all {
@@ -54,7 +73,7 @@ class MainViewModel(
 
         val localStream = stream ?: GenericStream(
             application,
-            ConnectionCheckerImpl(),
+            ConnectionCheckerImpl(streamingEventMutableSharedFlow),
             Camera2Source(application),
             MicrophoneSource()
         )
@@ -97,44 +116,49 @@ class MainViewModel(
         _isStreaming.value = false
     }
 
-    class ConnectionCheckerImpl : ConnectChecker {
+    private class ConnectionCheckerImpl(
+        private val streamingEventMutableSharedFlow: MutableSharedFlow<StreamingEvent>
+    ) : ConnectChecker {
         override fun onAuthError() {
-            Log.d(TAG, "onAuthError")
+            streamingEventMutableSharedFlow.tryEmit(StreamingEvent("onAuthError"))
         }
 
         override fun onAuthSuccess() {
-            Log.d(TAG, "onAuthSuccess")
+            streamingEventMutableSharedFlow.tryEmit(StreamingEvent("onAuthSuccess"))
         }
 
         override fun onConnectionFailed(reason: String) {
-            Log.d(TAG, "onConnectionFailed: $reason")
+            streamingEventMutableSharedFlow.tryEmit(StreamingEvent("onConnectionFailed: $reason"))
         }
 
         override fun onConnectionStarted(url: String) {
-            Log.d(TAG, "onConnectionStarted: $url")
+            streamingEventMutableSharedFlow.tryEmit(StreamingEvent("onConnectionStarted: $url"))
         }
 
         override fun onConnectionSuccess() {
-            Log.d(TAG, "onConnectionSuccess")
+            streamingEventMutableSharedFlow.tryEmit(StreamingEvent("onConnectionSuccess"))
         }
 
         override fun onDisconnect() {
-            Log.d(TAG, "onDisconnect")
+            streamingEventMutableSharedFlow.tryEmit(StreamingEvent("onDisconnect"))
         }
 
         override fun onNewBitrate(bitrate: Long) {
-            Log.d(TAG, "onNewBitrate: $bitrate")
+            streamingEventMutableSharedFlow.tryEmit(StreamingEvent("onNewBitrate: $bitrate"))
         }
-
     }
 
+    private data class StreamingEvent(
+        val message: String,
+        val timestamp: LocalDateTime = LocalDateTime.now()
+    )
+
     companion object {
-
-        private const val TAG = "MainViewModel"
-
         private const val DEFAULT_VIDEO_BITRATE_BPS = 4 * 1024 * 1024 // 4Mbps
         private const val DEFAULT_AUDIO_SAMPLING_RATE_HZ = 44100 // 44.1kHz
         private const val DEFAULT_AUDIO_BITRATE_BPS = 128 * 1024 // 128kbps
+
+        private const val STREAMING_EVENT_BUFFER_SIZE = 15
 
         private val REQUIRED_PERMISSIONS = listOfNotNull(
             Manifest.permission.CAMERA,
