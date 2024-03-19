@@ -5,15 +5,181 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_margin="16dp"
     tools:context=".MainActivity">
 
     <TextView
+        android:id="@+id/title_launch_parameter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:text="@string/launch_parameters"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/label_stream_url"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/label_stream_url"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title_launch_parameter" />
+
+    <TextView
+        android:id="@+id/stream_url"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        app:layout_constraintStart_toEndOf="@id/label_stream_url"
+        app:layout_constraintTop_toTopOf="@id/label_stream_url"
+        tools:text="rtmp://example.com" />
+
+    <TextView
+        android:id="@+id/label_stream_key"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/label_stream_key"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/label_stream_url" />
+
+    <TextView
+        android:id="@+id/stream_key"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        app:layout_constraintStart_toEndOf="@id/label_stream_key"
+        app:layout_constraintTop_toTopOf="@id/label_stream_key"
+        tools:text="xxxx-xxxx-xxxx-xxxx" />
+
+    <TextView
+        android:id="@+id/label_dimension"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/label_dimension"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/label_stream_key" />
+
+    <TextView
+        android:id="@+id/dimension"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        app:layout_constraintStart_toEndOf="@id/label_dimension"
+        app:layout_constraintTop_toTopOf="@id/label_dimension"
+        tools:text="(w)1920 x (h)1080" />
+
+
+    <TextView
+        android:id="@+id/label_video_bitrate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/label_video_bitrate"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/label_dimension" />
+
+    <TextView
+        android:id="@+id/video_bitrate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        app:layout_constraintStart_toEndOf="@id/label_video_bitrate"
+        app:layout_constraintTop_toTopOf="@id/label_video_bitrate"
+        tools:text="8000" />
+
+    <TextView
+        android:id="@+id/label_sampling_rate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/label_sampling_rate"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/label_video_bitrate" />
+
+    <TextView
+        android:id="@+id/sampling_rate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        app:layout_constraintStart_toEndOf="@id/label_sampling_rate"
+        app:layout_constraintTop_toTopOf="@id/label_sampling_rate"
+        tools:text="96" />
+
+    <TextView
+        android:id="@+id/label_audio_bitrate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/label_audio_bitrate"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/label_sampling_rate" />
+
+    <TextView
+        android:id="@+id/audio_bitrate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        app:layout_constraintStart_toEndOf="@id/label_audio_bitrate"
+        app:layout_constraintTop_toTopOf="@id/label_audio_bitrate"
+        tools:text="96" />
+
+
+    <TextView
+        android:id="@+id/title_app_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/app_status"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/label_audio_bitrate" />
+
+    <TextView
+        android:id="@+id/label_permission_granted"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/label_permission_granted"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title_app_status" />
+
+    <TextView
+        android:id="@+id/permission_granted"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        app:layout_constraintStart_toEndOf="@id/label_permission_granted"
+        app:layout_constraintTop_toTopOf="@id/label_permission_granted"
+        tools:text="true" />
+
+    <TextView
+        android:id="@+id/label_stream_prepared"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/label_stream_prepared"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/label_permission_granted" />
+
+    <TextView
+        android:id="@+id/stream_prepared"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        app:layout_constraintStart_toEndOf="@id/label_stream_prepared"
+        app:layout_constraintTop_toTopOf="@id/label_stream_prepared"
+        tools:text="true" />
+
+    <TextView
+        android:id="@+id/label_streaming"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/label_streaming"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/label_stream_prepared" />
+
+    <TextView
+        android:id="@+id/streaming"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        app:layout_constraintStart_toEndOf="@id/label_streaming"
+        app:layout_constraintTop_toTopOf="@id/label_streaming"
+        tools:text="true" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
