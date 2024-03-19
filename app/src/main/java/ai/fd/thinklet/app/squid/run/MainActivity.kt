@@ -2,9 +2,13 @@ package ai.fd.thinklet.app.squid.run
 
 import ai.fd.thinklet.app.squid.run.databinding.ActivityMainBinding
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.VibrationEffect.DEFAULT_AMPLITUDE
+import android.os.Vibrator
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.getSystemService
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
@@ -12,6 +16,10 @@ class MainActivity : AppCompatActivity() {
 
     private val binding: ActivityMainBinding by lazy(LazyThreadSafetyMode.NONE) {
         ActivityMainBinding.inflate(layoutInflater)
+    }
+
+    private val vibrator: Vibrator by lazy(LazyThreadSafetyMode.NONE) {
+        checkNotNull(getSystemService())
     }
 
     private val viewModel: MainViewModel by viewModels()
@@ -34,5 +42,29 @@ class MainActivity : AppCompatActivity() {
         binding.samplingRate.text = (viewModel.audioSampleRateHz / 1000f).toString()
         binding.audioBitrate.text = (viewModel.audioBitrateBps / 1024).toString()
         binding.permissionGranted.text = viewModel.isAllPermissionGranted().toString()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        maybeNotifyLaunchErrors()
+    }
+
+    private fun maybeNotifyLaunchErrors() {
+        if (!viewModel.isAllPermissionGranted()) {
+            vibrator.vibrate(createStaccatoVibrationEffect(2))
+            return
+        }
+        if (viewModel.streamUrl == null || viewModel.streamKey == null) {
+            vibrator.vibrate(createStaccatoVibrationEffect(3))
+            return
+        }
+    }
+
+    private fun createStaccatoVibrationEffect(staccatoCount: Int): VibrationEffect {
+        val timing = LongArray(staccatoCount * 2) { 200L }
+        val amplitudes = IntArray(staccatoCount * 2) { i ->
+            if (i % 2 == 0) 0 else DEFAULT_AMPLITUDE
+        }
+        return VibrationEffect.createWaveform(timing, amplitudes, -1)
     }
 }
