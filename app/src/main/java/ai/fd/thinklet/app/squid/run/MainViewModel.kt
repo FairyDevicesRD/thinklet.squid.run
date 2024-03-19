@@ -36,6 +36,9 @@ class MainViewModel(
     private val _isPrepared: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isPrepared: StateFlow<Boolean> = _isPrepared.asStateFlow()
 
+    private val _isStreaming: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val isStreaming: StateFlow<Boolean> = _isStreaming.asStateFlow()
+
     private var stream: GenericStream? = null
 
     fun isAllPermissionGranted(): Boolean = REQUIRED_PERMISSIONS.all {
@@ -68,6 +71,30 @@ class MainViewModel(
         } else {
             _isPrepared.value = false
         }
+    }
+
+    fun maybeStartStreaming(): Boolean {
+        val isStreamingStarted = maybeStartStreamingInternal()
+        _isStreaming.value = isStreamingStarted
+        return isStreamingStarted
+    }
+
+    private fun maybeStartStreamingInternal(): Boolean {
+        val streamSnapshot = stream
+        if (streamUrl == null || streamKey == null || streamSnapshot == null) {
+            return false
+        }
+        if (streamSnapshot.isStreaming) {
+            return true
+        }
+        streamSnapshot.startStream("$streamUrl/$streamKey")
+        return true
+    }
+
+    fun stopStreaming() {
+        val streamSnapshot = stream ?: return
+        streamSnapshot.stopStream()
+        _isStreaming.value = false
     }
 
     class ConnectionCheckerImpl : ConnectChecker {

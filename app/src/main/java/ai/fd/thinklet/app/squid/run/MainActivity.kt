@@ -53,12 +53,24 @@ class MainActivity : AppCompatActivity() {
                     binding.streamPrepared.text = it.toString()
                 }
         }
+        lifecycleScope.launch {
+            viewModel.isStreaming
+                .flowWithLifecycle(lifecycle)
+                .collect {
+                    binding.streaming.text = it.toString()
+                }
+        }
     }
 
     override fun onResume() {
         super.onResume()
         maybeNotifyLaunchErrors()
         viewModel.maybePrepareStreaming()
+    }
+
+    override fun onPause() {
+        viewModel.stopStreaming()
+        super.onPause()
     }
 
     private fun maybeNotifyLaunchErrors() {
@@ -70,6 +82,20 @@ class MainActivity : AppCompatActivity() {
             vibrator.vibrate(createStaccatoVibrationEffect(3))
             return
         }
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        when (keyCode) {
+            KeyEvent.KEYCODE_CAMERA -> {
+                if (!viewModel.isStreaming.value) {
+                    viewModel.maybeStartStreaming()
+                } else {
+                    viewModel.stopStreaming()
+                }
+                return true
+            }
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     private fun createStaccatoVibrationEffect(staccatoCount: Int): VibrationEffect {
