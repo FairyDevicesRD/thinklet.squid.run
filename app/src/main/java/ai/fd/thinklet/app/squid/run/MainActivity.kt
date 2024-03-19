@@ -95,15 +95,22 @@ class MainActivity : AppCompatActivity() {
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         when (keyCode) {
             KeyEvent.KEYCODE_CAMERA -> {
-                if (!viewModel.isStreaming.value) {
-                    viewModel.maybeStartStreaming()
-                } else {
-                    viewModel.stopStreaming()
-                }
+                toggleStreaming()
                 return true
             }
         }
         return super.onKeyDown(keyCode, event)
+    }
+
+    private fun toggleStreaming() {
+        if (!viewModel.isStreaming.value) {
+            val isStreamingStarted = viewModel.maybeStartStreaming()
+            if (!isStreamingStarted) {
+                vibrator.vibrate(createStaccatoVibrationEffect(2))
+            }
+        } else {
+            viewModel.stopStreaming()
+        }
     }
 
     private fun createStaccatoVibrationEffect(staccatoCount: Int): VibrationEffect {
