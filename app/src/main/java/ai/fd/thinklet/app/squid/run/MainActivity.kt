@@ -11,6 +11,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.getSystemService
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -42,11 +45,20 @@ class MainActivity : AppCompatActivity() {
         binding.samplingRate.text = (viewModel.audioSampleRateHz / 1000f).toString()
         binding.audioBitrate.text = (viewModel.audioBitrateBps / 1024).toString()
         binding.permissionGranted.text = viewModel.isAllPermissionGranted().toString()
+
+        lifecycleScope.launch {
+            viewModel.isPrepared
+                .flowWithLifecycle(lifecycle)
+                .collect {
+                    binding.streamPrepared.text = it.toString()
+                }
+        }
     }
 
     override fun onResume() {
         super.onResume()
         maybeNotifyLaunchErrors()
+        viewModel.maybePrepareStreaming()
     }
 
     private fun maybeNotifyLaunchErrors() {
