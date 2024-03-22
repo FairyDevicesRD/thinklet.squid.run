@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.extensions)
     implementation(libs.rootencoder)
+    implementation(thinkletLibs.sdk.maintenance)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

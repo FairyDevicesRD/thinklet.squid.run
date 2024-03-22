@@ -1,15 +1,23 @@
 package ai.fd.thinklet.app.squid.run
 
+import ai.fd.thinklet.sdk.maintenance.camera.Angle
 import android.Manifest
 import android.app.Application
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
+import android.util.Size
 import androidx.annotation.MainThread
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import com.pedro.common.ConnectChecker
+import com.pedro.encoder.input.gl.render.filters.BaseFilterRender
+import com.pedro.encoder.input.gl.render.filters.CropFilterRender
+import com.pedro.encoder.input.gl.render.filters.RotationFilterRender
+import com.pedro.encoder.input.video.CameraHelper
 import com.pedro.library.generic.GenericStream
+import com.pedro.library.rtmp.RtmpCamera2
 import com.pedro.library.util.sources.audio.MicrophoneSource
 import com.pedro.library.util.sources.video.Camera2Source
 import kotlinx.coroutines.channels.BufferOverflow
@@ -71,12 +79,18 @@ class MainViewModel(
             return
         }
 
+        val camera2Source = Camera2Source(application)
         val localStream = stream ?: GenericStream(
             application,
             ConnectionCheckerImpl(streamingEventMutableSharedFlow),
-            Camera2Source(application),
+            camera2Source,
             MicrophoneSource()
         )
+        val cameraMaxResolution = camera2Source.getCameraResolutions(CameraHelper.Facing.BACK)
+            .maxBy { it.width * it.height }
+        // Workaround to stream video at a specified size.
+        // Looking for a way to achieve this in a pure way without using cropping.
+        localStream.getGlInterface().setFilter(createCropFilter(cameraMaxResolution))
         val isPrepared = try {
             val isVideoPrepared = localStream.prepareVideo(
                 width = width,
@@ -97,6 +111,47 @@ class MainViewModel(
             _isPrepared.value = true
         } else {
             _isPrepared.value = false
+        }
+    }
+
+    private fun createCropFilter(cameraMaxResolution: Size): BaseFilterRender {
+        val sourceSize = if (Angle().isLandscape()) {
+            cameraMaxResolution
+        } else {
+            Size(cameraMaxResolution.height, cameraMaxResolution.width)
+        }
+        val sourceAspectRatio = sourceSize.width.toFloat() / sourceSize.height
+        val destinationAspectRatio = width.toFloat() / height
+        return if (sourceAspectRatio > destinationAspectRatio) {
+            val requiredWidthPercent =
+                (sourceSize.height * destinationAspectRatio) / sourceSize.width * 100
+            CropFilterRender().apply {
+                // Note: `height` should be `100` because use all of the height.
+                // However, RootEncoder has a bug that causes zero division when `100` is passed,
+                // so use a value as close to `100`.
+                // `width` is also capped at `99.9999` due to same reason.
+                setCropArea(
+                    offsetX = (100f - requiredWidthPercent) / 2,
+                    offsetY = 0f,
+                    width = requiredWidthPercent.coerceAtMost(99.9999f),
+                    height = 99.99999f
+                )
+            }
+        } else {
+            val requiredHeightPercent =
+                (sourceSize.width / destinationAspectRatio) / sourceSize.height * 100
+            CropFilterRender().apply {
+                // Note: `width` should be `100` because use all of the width. However, RootEncoder
+                // However, RootEncoder has a bug that causes zero division when `100` is passed,
+                // so use a value as close to `100`.
+                // `height` is also capped at `99.9999` due to same reason.
+                setCropArea(
+                    offsetX = 0f,
+                    offsetY = (100f - requiredHeightPercent) / 2,
+                    width = 99.99999f,
+                    height = requiredHeightPercent.coerceAtMost(99.9999f)
+                )
+            }
         }
     }
 
