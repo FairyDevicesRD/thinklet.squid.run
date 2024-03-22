@@ -78,8 +78,16 @@ class MainViewModel(
             MicrophoneSource()
         )
         val isPrepared = try {
-            val isVideoPrepared = localStream.prepareVideo(width, height, videoBitrateBps)
-            val isAudioPrepared = localStream.prepareAudio(audioSampleRateHz, true, audioBitrateBps)
+            val isVideoPrepared = localStream.prepareVideo(
+                width = width,
+                height = height,
+                bitrate = videoBitrateBps
+            )
+            val isAudioPrepared = localStream.prepareAudio(
+                sampleRate = audioSampleRateHz,
+                isStereo = true,
+                bitrate = audioBitrateBps
+            )
             isVideoPrepared && isAudioPrepared
         } catch (e: IllegalArgumentException) {
             false
