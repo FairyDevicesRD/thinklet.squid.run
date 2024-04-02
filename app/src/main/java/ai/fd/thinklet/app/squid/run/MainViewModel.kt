@@ -5,23 +5,28 @@ import android.Manifest
 import android.app.Application
 import android.content.pm.PackageManager
 import android.os.Build
+import android.view.Surface
 import androidx.annotation.MainThread
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import com.pedro.common.ConnectChecker
 import com.pedro.encoder.input.gl.render.filters.RotationFilterRender
 import com.pedro.library.generic.GenericStream
 import com.pedro.library.util.sources.audio.MicrophoneSource
 import com.pedro.library.util.sources.video.Camera2Source
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.runningFold
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -44,6 +49,7 @@ class MainViewModel(
         savedState.get<Int>("audioSampleRate") ?: DEFAULT_AUDIO_SAMPLING_RATE_HZ
     val audioBitrateBps: Int =
         savedState.get<Int>("audioBitrate")?.let { it * 1024 } ?: DEFAULT_AUDIO_BITRATE_BPS
+    val shouldShowPreview: Boolean = savedState.get<Boolean>("preview") ?: false
 
     private val _isPrepared: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isPrepared: StateFlow<Boolean> = _isPrepared.asStateFlow()
@@ -71,6 +77,8 @@ class MainViewModel(
         get() = if (angle.isPortrait()) longSide else shortSide
 
     private var stream: GenericStream? = null
+
+    private var startPreviewJob: Job? = null
 
     init {
         when (orientation) {
@@ -156,6 +164,31 @@ class MainViewModel(
         val streamSnapshot = stream ?: return
         streamSnapshot.stopStream()
         _isStreaming.value = false
+    }
+
+    @MainThread
+    fun startPreview(surface: Surface, width: Int, height: Int) {
+        val localStream = stream ?: return
+        if (localStream.isOnPreview) {
+            localStream.stopPreview()
+        }
+
+        if (startPreviewJob != null) {
+            return
+        }
+        startPreviewJob = viewModelScope.launch {
+            isPrepared.first { true }
+            localStream.startPreview(surface, width, height)
+        }
+    }
+
+    @MainThread
+    fun stopPreview() {
+        startPreviewJob?.cancel()
+        val localStream = stream ?: return
+        if (localStream.isOnPreview) {
+            localStream.stopPreview()
+        }
     }
 
     private class ConnectionCheckerImpl(

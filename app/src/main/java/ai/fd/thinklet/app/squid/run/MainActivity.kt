@@ -1,18 +1,22 @@
 package ai.fd.thinklet.app.squid.run
 
 import ai.fd.thinklet.app.squid.run.databinding.ActivityMainBinding
+import ai.fd.thinklet.app.squid.run.databinding.PreviewBinding
 import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.VibrationEffect.DEFAULT_AMPLITUDE
 import android.os.Vibrator
 import android.view.KeyEvent
+import android.view.SurfaceHolder
 import android.view.WindowManager
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.getSystemService
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
@@ -48,6 +52,25 @@ class MainActivity : AppCompatActivity() {
         binding.samplingRate.text = (viewModel.audioSampleRateHz / 1000f).toString()
         binding.audioBitrate.text = (viewModel.audioBitrateBps / 1024).toString()
         binding.permissionGranted.text = viewModel.isAllPermissionGranted().toString()
+
+        if (viewModel.shouldShowPreview) {
+            val previewBinding = PreviewBinding.bind(binding.previewStub.inflate())
+            previewBinding.preview.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                dimensionRatio = "${viewModel.width}:${viewModel.height}"
+            }
+            previewBinding.preview.holder.addCallback(object : SurfaceHolder.Callback {
+                override fun surfaceCreated(holder: SurfaceHolder) = Unit
+
+                override fun surfaceChanged(
+                    holder: SurfaceHolder,
+                    format: Int,
+                    width: Int,
+                    height: Int
+                ) = viewModel.startPreview(holder.surface, width, height)
+
+                override fun surfaceDestroyed(holder: SurfaceHolder) = viewModel.stopPreview()
+            })
+        }
 
         lifecycleScope.launch {
             viewModel.isPrepared
