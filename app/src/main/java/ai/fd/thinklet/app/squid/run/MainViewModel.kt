@@ -30,10 +30,14 @@ class MainViewModel(
     savedState: SavedStateHandle
 ) : AndroidViewModel(application) {
 
+    private val angle: Angle by lazy(LazyThreadSafetyMode.NONE, ::Angle)
+
     val streamUrl: String? = savedState.get<String>("streamUrl")
     val streamKey: String? = savedState.get<String>("streamKey")
-    val width: Int = savedState.get<Int>("width") ?: 720
-    val height: Int = savedState.get<Int>("height") ?: 480
+    private val longSide: Int = savedState.get<Int>("longSide") ?: 720
+    private val shortSide: Int = savedState.get<Int>("shortSide") ?: 480
+    private val orientation: Orientation? =
+        Orientation.fromArgumentValue(savedState.get<String>("orientation"))
     val videoBitrateBps: Int =
         savedState.get<Int>("videoBitrate")?.let { it * 1024 } ?: DEFAULT_VIDEO_BITRATE_BPS
     val audioSampleRateHz: Int =
@@ -60,7 +64,21 @@ class MainViewModel(
             acc
         }
 
+    val width: Int
+        get() = if (angle.isPortrait()) shortSide else longSide
+
+    val height: Int
+        get() = if (angle.isPortrait()) longSide else shortSide
+
     private var stream: GenericStream? = null
+
+    init {
+        when (orientation) {
+            Orientation.LANDSCAPE -> angle.setLandscape()
+            Orientation.PORTRAIT -> angle.setPortrait()
+            null -> Unit
+        }
+    }
 
     fun isAllPermissionGranted(): Boolean = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(application, it) == PackageManager.PERMISSION_GRANTED
@@ -90,9 +108,12 @@ class MainViewModel(
             }
         }
         val isPrepared = try {
+            // Note: The output size is converted by 90 degrees inside RootEncoder when the rotation
+            // is portrait. Therefore, we intentionally pass `longSide` and `shortSide` to `width`
+            // and `height` respectively so that it will be output at the correct size.
             val isVideoPrepared = localStream.prepareVideo(
-                width = width,
-                height = height,
+                width = longSide,
+                height = shortSide,
                 bitrate = videoBitrateBps,
                 rotation = angle.current()
             )
@@ -173,6 +194,15 @@ class MainViewModel(
         val message: String,
         val timestamp: LocalDateTime = LocalDateTime.now()
     )
+
+    enum class Orientation(val argumentValue: String) {
+        LANDSCAPE("landscape"), PORTRAIT("portrait");
+
+        companion object {
+            fun fromArgumentValue(value: String?): Orientation? =
+                entries.find { it.argumentValue == value }
+        }
+    }
 
     companion object {
         private const val DEFAULT_VIDEO_BITRATE_BPS = 4 * 1024 * 1024 // 4Mbps
