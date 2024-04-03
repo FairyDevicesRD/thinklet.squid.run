@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">thinklet.squid.run</string>
+    <string name="launch_parameters">Launch Parameters</string>
+    <string name="label_stream_url">Stream URL: </string>
+    <string name="label_stream_key">Stream Key: </string>
+    <string name="label_dimension">Video Dimension: </string>
+    <string name="label_video_bitrate">Video Bitrate (kbps): </string>
+    <string name="label_sampling_rate">Audio Sampling Rate (kHz): </string>
+    <string name="label_audio_bitrate">Audio Bitrate (kbps): </string>
+    <string name="app_status">App Status</string>
+    <string name="label_permission_granted">Permission Granted: </string>
+    <string name="label_stream_prepared">Stream Prepared: </string>
+    <string name="label_streaming">Streaming: </string>
+    <string name="dimension_text">(w)%1$d x (h)%2$d</string>
+    <string name="streaming_events">Streaming Events</string>
 </resources>
