@@ -1,5 +1,6 @@
 package ai.fd.thinklet.app.squid.run
 
+import ai.fd.thinklet.sdk.audio.MultiChannelAudioRecord
 import ai.fd.thinklet.sdk.maintenance.camera.Angle
 import android.Manifest
 import android.app.Application
@@ -110,6 +111,15 @@ class MainViewModel(
         val camera2Source = Camera2Source(application)
         val audioSource = when (micMode) {
             MicMode.ANDROID -> MicrophoneSource()
+            MicMode.THINKLET_5 -> ThinkletMicrophoneSource(
+                application,
+                MultiChannelAudioRecord.Channel.CHANNEL_FIVE
+            )
+
+            MicMode.THINKLET_6 -> ThinkletMicrophoneSource(
+                application,
+                MultiChannelAudioRecord.Channel.CHANNEL_SIX
+            )
         }
         val localStream = stream ?: GenericStream(
             application,
@@ -258,7 +268,10 @@ class MainViewModel(
     }
 
     enum class MicMode(val argumentValue: String) {
-        ANDROID("android");
+        ANDROID("android"),
+        THINKLET_5("thinklet5"),
+        THINKLET_6("thinklet6"),
+        ;
 
         companion object {
             fun fromArgumentValue(value: String?): MicMode? =
