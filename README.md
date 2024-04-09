@@ -48,6 +48,7 @@ SquidRunは、THINKLETを用いたRTMP(S)によるライブストリーミング
 | `videoBitrate`    | Int     |    | 4096  | ビデオのビットレート。単位はkbps。                                                                            |
 | `audioSampleRate` | Int     |    | 44100 | オーディオのサンプリングレート。単位はHz。                                                                         |
 | `audioBitrate`    | Int     |    | 128   | オーディオのビットレート。単位はkbps。                                                                          |
+| `echoCanceler`    | Boolean |    | false | エコーキャンセラーを有効にするかどうか。                                                                           |
 | `preview`         | Boolean |    | false | 画面上にストリーミングのプレビューを表示するかどうか。<br/>デバッグ時以外はバッテリー節約のためOFFを推奨。                                      |
 
 ### adbコマンドによる起動

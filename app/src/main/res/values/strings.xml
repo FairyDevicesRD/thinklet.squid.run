@@ -7,6 +7,7 @@
     <string name="label_video_bitrate">Video Bitrate (kbps): </string>
     <string name="label_sampling_rate">Audio Sampling Rate (kHz): </string>
     <string name="label_audio_bitrate">Audio Bitrate (kbps): </string>
+    <string name="label_echo_canceler">Echo Canceler: </string>
     <string name="app_status">App Status</string>
     <string name="label_permission_granted">Permission Granted: </string>
     <string name="label_stream_prepared">Stream Prepared: </string>

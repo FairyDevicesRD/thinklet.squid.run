@@ -49,6 +49,7 @@ class MainViewModel(
         savedState.get<Int>("audioSampleRate") ?: DEFAULT_AUDIO_SAMPLING_RATE_HZ
     val audioBitrateBps: Int =
         savedState.get<Int>("audioBitrate")?.let { it * 1024 } ?: DEFAULT_AUDIO_BITRATE_BPS
+    val isEchoCancelerEnabled: Boolean = savedState.get<Boolean>("echoCanceler") ?: false
     val shouldShowPreview: Boolean = savedState.get<Boolean>("preview") ?: false
 
     private val _isPrepared: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -128,7 +129,8 @@ class MainViewModel(
             val isAudioPrepared = localStream.prepareAudio(
                 sampleRate = audioSampleRateHz,
                 isStereo = true,
-                bitrate = audioBitrateBps
+                bitrate = audioBitrateBps,
+                echoCanceler = isEchoCancelerEnabled
             )
             isVideoPrepared && isAudioPrepared
         } catch (e: IllegalArgumentException) {
