@@ -49,6 +49,9 @@ class MainViewModel(
         savedState.get<Int>("audioSampleRate") ?: DEFAULT_AUDIO_SAMPLING_RATE_HZ
     val audioBitrateBps: Int =
         savedState.get<Int>("audioBitrate")?.let { it * 1024 } ?: DEFAULT_AUDIO_BITRATE_BPS
+    val audioChannel: AudioChannel =
+        AudioChannel.fromArgumentValue(savedState.get<String>("audioChannel"))
+            ?: AudioChannel.STEREO
     val isEchoCancelerEnabled: Boolean = savedState.get<Boolean>("echoCanceler") ?: false
     val shouldShowPreview: Boolean = savedState.get<Boolean>("preview") ?: false
 
@@ -128,7 +131,7 @@ class MainViewModel(
             )
             val isAudioPrepared = localStream.prepareAudio(
                 sampleRate = audioSampleRateHz,
-                isStereo = true,
+                isStereo = audioChannel == AudioChannel.STEREO,
                 bitrate = audioBitrateBps,
                 echoCanceler = isEchoCancelerEnabled
             )
@@ -235,6 +238,15 @@ class MainViewModel(
 
         companion object {
             fun fromArgumentValue(value: String?): Orientation? =
+                entries.find { it.argumentValue == value }
+        }
+    }
+
+    enum class AudioChannel(val argumentValue: String) {
+        MONAURAL("monaural"), STEREO("stereo");
+
+        companion object {
+            fun fromArgumentValue(value: String?): AudioChannel? =
                 entries.find { it.argumentValue == value }
         }
     }

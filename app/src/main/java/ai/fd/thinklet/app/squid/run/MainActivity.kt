@@ -51,6 +51,7 @@ class MainActivity : AppCompatActivity() {
         binding.videoBitrate.text = (viewModel.videoBitrateBps / 1024).toString()
         binding.samplingRate.text = (viewModel.audioSampleRateHz / 1000f).toString()
         binding.audioBitrate.text = (viewModel.audioBitrateBps / 1024).toString()
+        binding.audioChannel.text = viewModel.audioChannel.argumentValue
         binding.echoCanceler.text = viewModel.isEchoCancelerEnabled.toString()
         binding.permissionGranted.text = viewModel.isAllPermissionGranted().toString()
 
