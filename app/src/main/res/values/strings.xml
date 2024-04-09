@@ -9,6 +9,7 @@
     <string name="label_audio_bitrate">Audio Bitrate (kbps): </string>
     <string name="label_audio_channel">Audio Channel: </string>
     <string name="label_echo_canceler">Echo Canceler: </string>
+    <string name="label_mic_mode">Mic Mode: </string>
     <string name="app_status">App Status</string>
     <string name="label_permission_granted">Permission Granted: </string>
     <string name="label_stream_prepared">Stream Prepared: </string>

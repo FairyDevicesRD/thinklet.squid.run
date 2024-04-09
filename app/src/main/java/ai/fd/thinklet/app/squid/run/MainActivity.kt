@@ -53,6 +53,7 @@ class MainActivity : AppCompatActivity() {
         binding.audioBitrate.text = (viewModel.audioBitrateBps / 1024).toString()
         binding.audioChannel.text = viewModel.audioChannel.argumentValue
         binding.echoCanceler.text = viewModel.isEchoCancelerEnabled.toString()
+        binding.micMode.text = viewModel.micMode.argumentValue
         binding.permissionGranted.text = viewModel.isAllPermissionGranted().toString()
 
         if (viewModel.shouldShowPreview) {

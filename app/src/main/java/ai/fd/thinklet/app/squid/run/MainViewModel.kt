@@ -52,6 +52,9 @@ class MainViewModel(
     val audioChannel: AudioChannel =
         AudioChannel.fromArgumentValue(savedState.get<String>("audioChannel"))
             ?: AudioChannel.STEREO
+    val micMode: MicMode =
+        MicMode.fromArgumentValue(savedState.get<String>("micMode"))
+            ?: MicMode.ANDROID
     val isEchoCancelerEnabled: Boolean = savedState.get<Boolean>("echoCanceler") ?: false
     val shouldShowPreview: Boolean = savedState.get<Boolean>("preview") ?: false
 
@@ -105,11 +108,14 @@ class MainViewModel(
 
         val angle = Angle()
         val camera2Source = Camera2Source(application)
+        val audioSource = when (micMode) {
+            MicMode.ANDROID -> MicrophoneSource()
+        }
         val localStream = stream ?: GenericStream(
             application,
             ConnectionCheckerImpl(streamingEventMutableSharedFlow),
             camera2Source,
-            MicrophoneSource()
+            audioSource
         ).apply {
             getGlInterface().autoHandleOrientation = false
             if (angle.isLandscape()) {
@@ -247,6 +253,15 @@ class MainViewModel(
 
         companion object {
             fun fromArgumentValue(value: String?): AudioChannel? =
+                entries.find { it.argumentValue == value }
+        }
+    }
+
+    enum class MicMode(val argumentValue: String) {
+        ANDROID("android");
+
+        companion object {
+            fun fromArgumentValue(value: String?): MicMode? =
                 entries.find { it.argumentValue == value }
         }
     }
