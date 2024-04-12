@@ -8,7 +8,6 @@ import android.util.Log
 import com.pedro.encoder.Frame
 import com.pedro.encoder.input.audio.GetMicrophoneData
 import com.pedro.library.util.sources.audio.AudioSource
-import java.io.OutputStream
 
 class ThinkletMicrophoneSource(
     private val context: Context,
@@ -102,7 +101,11 @@ class ThinkletMicrophoneSource(
                 }
             }
             this.rawAudioRecordWrapper = rawAudioRecordWrapper
-            rawAudioRecordWrapper.start(NullOutputStream(), listener, isEchoCancelerEnabled)
+            rawAudioRecordWrapper.start(
+                callback = listener,
+                enableEchoCanceler = isEchoCancelerEnabled,
+                outputStream = null
+            )
             return true
         }
 
@@ -117,12 +120,6 @@ class ThinkletMicrophoneSource(
         companion object {
             private const val TAG = "RawAudioRecordWrapperBridge"
         }
-    }
-
-    private class NullOutputStream : OutputStream() {
-        override fun write(b: Int) = Unit
-        override fun write(b: ByteArray?) = Unit
-        override fun write(b: ByteArray?, off: Int, len: Int) = Unit
     }
 
     companion object {
