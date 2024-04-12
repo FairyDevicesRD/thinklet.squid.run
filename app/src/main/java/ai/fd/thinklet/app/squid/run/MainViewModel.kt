@@ -281,7 +281,7 @@ class MainViewModel(
 
     companion object {
         private const val DEFAULT_VIDEO_BITRATE_BPS = 4 * 1024 * 1024 // 4Mbps
-        private const val DEFAULT_AUDIO_SAMPLING_RATE_HZ = 44100 // 44.1kHz
+        private const val DEFAULT_AUDIO_SAMPLING_RATE_HZ = 48000 // 48kHz
         private const val DEFAULT_AUDIO_BITRATE_BPS = 128 * 1024 // 128kbps
 
         private const val STREAMING_EVENT_BUFFER_SIZE = 15

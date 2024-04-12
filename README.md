@@ -46,7 +46,7 @@ SquidRunは、THINKLETを用いたRTMP(S)によるライブストリーミング
 | `shortSide`       | Int     |    | 480     | ストリームの短辺の解像度                                                                                   |
 | `orientation`     | String  |    |         | 指定された方向の解像度を強制する。<br/>`landscape`の場合は横長、`portrait`の場合は縦長となる。<br/>未指定の場合はデバイスのモデルに応じた方向の解像度になる。 |
 | `videoBitrate`    | Int     |    | 4096    | ビデオのビットレート。単位はkbps。                                                                            |
-| `audioSampleRate` | Int     |    | 44100   | オーディオのサンプリングレート。単位はHz。                                                                         |
+| `audioSampleRate` | Int     |    | 48000   | オーディオのサンプリングレート。単位はHz。                                                                         |
 | `audioBitrate`    | Int     |    | 128     | オーディオのビットレート。単位はkbps。                                                                          |
 | `audioChannel`    | String  |    | stereo  | オーディオのチャンネル数。<br/>`monaural`の場合は1チャンネル、`stereo`の場合は2チャンネルとなる。                                  |
 | `echoCanceler`    | Boolean |    | false   | エコーキャンセラーを有効にするかどうか。                                                                           |
@@ -55,11 +55,11 @@ SquidRunは、THINKLETを用いたRTMP(S)によるライブストリーミング
 
 #### マイクモード
 
-| 値         | 説明                                                                |
-|-----------|-------------------------------------------------------------------|
-| android   | Androidの標準実装を使用する。`audioChannel`に応じて1つまたは2つのマイクを使用する。             |
-| thinklet5 | THINKLETの5つのマイクを使用する。`audioChannel`に応じて複数のマイクの音声を合成する。            |
-| thinklet6 | THINKLETの5つのマイクに加えて参照音用マイクを使用する。`audioChannel`に応じて複数のマイクの音声を合成する。 |
+| 値         | 説明                                                                                                                             |
+|-----------|--------------------------------------------------------------------------------------------------------------------------------|
+| android   | Androidの標準実装を使用する。`audioChannel`に応じて1つまたは2つのマイクを使用する。                                                                          |
+| thinklet5 | THINKLETの5つのマイクを使用する。`audioChannel`に応じて複数のマイクの音声を合成する。<br/>`audioSampleRate`は`16000`, `32000`, `48000`のどれかである必要がある。            |
+| thinklet6 | THINKLETの5つのマイクに加えて参照音用マイクを使用する。`audioChannel`に応じて複数のマイクの音声を合成する。<br/>`audioSampleRate`は`16000`, `32000`, `48000`のどれかである必要がある。 |
 
 ### adbコマンドによる起動
 
