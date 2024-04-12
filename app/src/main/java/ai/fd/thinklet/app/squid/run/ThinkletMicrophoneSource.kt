@@ -14,6 +14,8 @@ class ThinkletMicrophoneSource(
     private val inputChannel: MultiChannelAudioRecord.Channel
 ) : AudioSource() {
 
+    private var isMuted: Boolean = false
+
     private var bridge: RawAudioRecordWrapperBridge? = null
 
     // Note: No items that can be checked in advance.
@@ -28,7 +30,7 @@ class ThinkletMicrophoneSource(
         val newBridge = RawAudioRecordWrapperBridge(
             inputChannel = inputChannel,
         ) { frame ->
-            getMicrophoneData.inputPCMData(frame)
+            getMicrophoneData.inputPCMData(frame.maybeMuted(isMuted))
         }
         val isStarted = newBridge.start(context, sampleRate, isStereo, echoCanceler)
         if (!isStarted) {
@@ -52,6 +54,14 @@ class ThinkletMicrophoneSource(
     override fun getMaxInputSize(): Int = BUFFER_SIZE_IN_BYTES * (sampleRate / SAMPLING_RATE_MIN)
 
     override fun setMaxInputSize(size: Int) = Unit
+
+    fun mute() {
+        isMuted = true
+    }
+
+    fun unMute() {
+        isMuted = false
+    }
 
     private class RawAudioRecordWrapperBridge(
         private val inputChannel: MultiChannelAudioRecord.Channel,
@@ -125,5 +135,12 @@ class ThinkletMicrophoneSource(
     companion object {
         private const val BUFFER_SIZE_IN_BYTES = 1920
         private const val SAMPLING_RATE_MIN = 16000
+
+        private fun Frame.maybeMuted(isMuted: Boolean): Frame {
+            if (!isMuted) {
+                return this
+            }
+            return Frame(ByteArray(size), 0, size, timeStamp)
+        }
     }
 }

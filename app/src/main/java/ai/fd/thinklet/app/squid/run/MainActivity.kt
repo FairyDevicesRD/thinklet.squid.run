@@ -96,6 +96,13 @@ class MainActivity : AppCompatActivity() {
                     binding.streamingEvents.text = it.asReversed().joinToString("\n")
                 }
         }
+        lifecycleScope.launch {
+            viewModel.isAudioMuted
+                .flowWithLifecycle(lifecycle)
+                .collect {
+                    binding.audioMuted.text = it.toString()
+                }
+        }
     }
 
     override fun onResume() {
@@ -126,6 +133,11 @@ class MainActivity : AppCompatActivity() {
                 toggleStreaming()
                 return true
             }
+
+            KeyEvent.KEYCODE_VOLUME_UP -> {
+                toggleAudioMute()
+                return true
+            }
         }
         return super.onKeyDown(keyCode, event)
     }
@@ -138,6 +150,16 @@ class MainActivity : AppCompatActivity() {
             }
         } else {
             viewModel.stopStreaming()
+        }
+    }
+
+    private fun toggleAudioMute() {
+        if (viewModel.isAudioMuted.value) {
+            viewModel.unMuteAudio()
+            vibrator.vibrate(createStaccatoVibrationEffect(1))
+        } else {
+            viewModel.muteAudio()
+            vibrator.vibrate(createStaccatoVibrationEffect(2))
         }
     }
 

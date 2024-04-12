@@ -4,6 +4,7 @@ import ai.fd.thinklet.sdk.audio.MultiChannelAudioRecord
 import ai.fd.thinklet.sdk.maintenance.camera.Angle
 import android.Manifest
 import android.app.Application
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.view.Surface
@@ -65,6 +66,9 @@ class MainViewModel(
     private val _isStreaming: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isStreaming: StateFlow<Boolean> = _isStreaming.asStateFlow()
 
+    private val _isAudioMuted: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val isAudioMuted: StateFlow<Boolean> = _isAudioMuted.asStateFlow()
+
     private val streamingEventMutableSharedFlow: MutableSharedFlow<StreamingEvent> =
         MutableSharedFlow(replay = 10, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
@@ -109,16 +113,20 @@ class MainViewModel(
 
         val angle = Angle()
         val camera2Source = Camera2Source(application)
+        val isInitiallyMuted = _isAudioMuted.value
         val audioSource = when (micMode) {
-            MicMode.ANDROID -> MicrophoneSource()
-            MicMode.THINKLET_5 -> ThinkletMicrophoneSource(
+            MicMode.ANDROID -> createMicrophoneSource(isInitiallyMuted)
+
+            MicMode.THINKLET_5 -> createThinkletMicrophoneSource(
                 application,
-                MultiChannelAudioRecord.Channel.CHANNEL_FIVE
+                MultiChannelAudioRecord.Channel.CHANNEL_FIVE,
+                isInitiallyMuted
             )
 
-            MicMode.THINKLET_6 -> ThinkletMicrophoneSource(
+            MicMode.THINKLET_6 -> createThinkletMicrophoneSource(
                 application,
-                MultiChannelAudioRecord.Channel.CHANNEL_SIX
+                MultiChannelAudioRecord.Channel.CHANNEL_SIX,
+                isInitiallyMuted
             )
         }
         val localStream = stream ?: GenericStream(
@@ -161,6 +169,26 @@ class MainViewModel(
         } else {
             _isPrepared.value = false
         }
+    }
+
+    private fun createMicrophoneSource(isInitiallyMuted: Boolean): MicrophoneSource {
+        val microphoneSource = MicrophoneSource()
+        if (isInitiallyMuted) {
+            microphoneSource.mute()
+        }
+        return microphoneSource
+    }
+
+    private fun createThinkletMicrophoneSource(
+        context: Context,
+        inputChannel: MultiChannelAudioRecord.Channel,
+        isInitiallyMuted: Boolean
+    ): ThinkletMicrophoneSource {
+        val microphoneSource = ThinkletMicrophoneSource(context, inputChannel)
+        if (isInitiallyMuted) {
+            microphoneSource.mute()
+        }
+        return microphoneSource
     }
 
     fun maybeStartStreaming(): Boolean {
@@ -209,6 +237,24 @@ class MainViewModel(
         val localStream = stream ?: return
         if (localStream.isOnPreview) {
             localStream.stopPreview()
+        }
+    }
+
+    fun muteAudio() {
+        _isAudioMuted.value = true
+        val audioSource = stream?.audioSource ?: return
+        when (audioSource) {
+            is ThinkletMicrophoneSource -> audioSource.mute()
+            is MicrophoneSource -> audioSource.mute()
+        }
+    }
+
+    fun unMuteAudio() {
+        _isAudioMuted.value = false
+        val audioSource = stream?.audioSource ?: return
+        when (audioSource) {
+            is ThinkletMicrophoneSource -> audioSource.unMute()
+            is MicrophoneSource -> audioSource.unMute()
         }
     }
 
