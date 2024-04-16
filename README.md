@@ -110,3 +110,45 @@ adb shell am start \
 ```shell
 ./gradlew :app:assembleRelease
 ```
+
+## 付録
+
+### テスト用RTMPサーバの用意
+
+このアプリを使用したストリーミング機能を動作させるためには、RTMPサーバーが必要です。
+YouTube Liveなどの外部サービスを使用することもできますが、ローカル環境でのテストを行いたい場合は、以下の手順でRTMPサーバーを用意することができます。
+
+#### MediaMTX の準備
+
+ここでは、[MediaMTX](https://github.com/bluenviron/mediamtx) を使用してRTMPサーバーを構築します。
+リリースページより、サーバーを動かす環境に合った最新のリリースをダウンロードしてください。
+このドキュメントでは、Apple Silicon版のmacOSをRTMPサーバとして使用する場合を紹介します。
+※MediaMTXを実行しているマシンとLINKLETは同じネットワークに接続する必要があります。
+
+1. ダウンロードした.tar.gzファイルを解凍します。
+2. 解凍したフォルダをターミナルで開き、`mediamtx` を実行します。
+
+このRTMPサーバにストリーミングを行う場合、起動時パラメーターは以下のように設定します。
+
+```
+streamUrl: rtmp://[MediaMTXを実行しているマシンのIPアドレス]:1935
+streamKey: [任意の文字列]
+```
+
+### ストリームされた映像を確認する
+
+ストリーミングされた映像を確認するためには、ffmpegに付属する[ffplay](https://ffmpeg.org/ffplay.html)を使用すると便利です。
+
+#### ffplay の準備
+
+[ffmpegのダウンロードページ](https://ffmpeg.org/download.html)から、自分の環境に合ったバイナリをダウンロードしてください。
+※MediaMTXを実行しているマシンと同じマシンもしくは同じネットワークに接続する必要があります。
+
+1. ffmpegをダウンロード・およびインストール(pathに通し)します。
+2. ターミナルを開き、以下のコマンドを実行します。
+
+```
+ffplay rtmp://[MediaMTXを実行しているマシンのIPアドレス]:1935/[streamKey]
+```
+
+`[streamKey]` は、MediaMTXの起動時に指定した `streamKey` と同じものを指定してください。
