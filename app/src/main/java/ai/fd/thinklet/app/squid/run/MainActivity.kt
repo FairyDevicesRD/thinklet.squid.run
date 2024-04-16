@@ -51,6 +51,9 @@ class MainActivity : AppCompatActivity() {
         binding.videoBitrate.text = (viewModel.videoBitrateBps / 1024).toString()
         binding.samplingRate.text = (viewModel.audioSampleRateHz / 1000f).toString()
         binding.audioBitrate.text = (viewModel.audioBitrateBps / 1024).toString()
+        binding.audioChannel.text = viewModel.audioChannel.argumentValue
+        binding.echoCanceler.text = viewModel.isEchoCancelerEnabled.toString()
+        binding.micMode.text = viewModel.micMode.argumentValue
         binding.permissionGranted.text = viewModel.isAllPermissionGranted().toString()
 
         if (viewModel.shouldShowPreview) {
@@ -93,6 +96,13 @@ class MainActivity : AppCompatActivity() {
                     binding.streamingEvents.text = it.asReversed().joinToString("\n")
                 }
         }
+        lifecycleScope.launch {
+            viewModel.isAudioMuted
+                .flowWithLifecycle(lifecycle)
+                .collect {
+                    binding.audioMuted.text = it.toString()
+                }
+        }
     }
 
     override fun onResume() {
@@ -123,6 +133,11 @@ class MainActivity : AppCompatActivity() {
                 toggleStreaming()
                 return true
             }
+
+            KeyEvent.KEYCODE_VOLUME_UP -> {
+                toggleAudioMute()
+                return true
+            }
         }
         return super.onKeyDown(keyCode, event)
     }
@@ -135,6 +150,16 @@ class MainActivity : AppCompatActivity() {
             }
         } else {
             viewModel.stopStreaming()
+        }
+    }
+
+    private fun toggleAudioMute() {
+        if (viewModel.isAudioMuted.value) {
+            viewModel.unMuteAudio()
+            vibrator.vibrate(createStaccatoVibrationEffect(1))
+        } else {
+            viewModel.muteAudio()
+            vibrator.vibrate(createStaccatoVibrationEffect(2))
         }
     }
 

@@ -7,10 +7,14 @@
     <string name="label_video_bitrate">Video Bitrate (kbps): </string>
     <string name="label_sampling_rate">Audio Sampling Rate (kHz): </string>
     <string name="label_audio_bitrate">Audio Bitrate (kbps): </string>
+    <string name="label_audio_channel">Audio Channel: </string>
+    <string name="label_echo_canceler">Echo Canceler: </string>
+    <string name="label_mic_mode">Mic Mode: </string>
     <string name="app_status">App Status</string>
     <string name="label_permission_granted">Permission Granted: </string>
     <string name="label_stream_prepared">Stream Prepared: </string>
     <string name="label_streaming">Streaming: </string>
+    <string name="label_audio_muted">Audio Muted: </string>
     <string name="dimension_text">(w)%1$d x (h)%2$d</string>
     <string name="streaming_events">Streaming Events</string>
 </resources>

@@ -1,8 +1,10 @@
 package ai.fd.thinklet.app.squid.run
 
+import ai.fd.thinklet.sdk.audio.MultiChannelAudioRecord
 import ai.fd.thinklet.sdk.maintenance.camera.Angle
 import android.Manifest
 import android.app.Application
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.view.Surface
@@ -49,6 +51,13 @@ class MainViewModel(
         savedState.get<Int>("audioSampleRate") ?: DEFAULT_AUDIO_SAMPLING_RATE_HZ
     val audioBitrateBps: Int =
         savedState.get<Int>("audioBitrate")?.let { it * 1024 } ?: DEFAULT_AUDIO_BITRATE_BPS
+    val audioChannel: AudioChannel =
+        AudioChannel.fromArgumentValue(savedState.get<String>("audioChannel"))
+            ?: AudioChannel.STEREO
+    val micMode: MicMode =
+        MicMode.fromArgumentValue(savedState.get<String>("micMode"))
+            ?: MicMode.ANDROID
+    val isEchoCancelerEnabled: Boolean = savedState.get<Boolean>("echoCanceler") ?: false
     val shouldShowPreview: Boolean = savedState.get<Boolean>("preview") ?: false
 
     private val _isPrepared: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -56,6 +65,9 @@ class MainViewModel(
 
     private val _isStreaming: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isStreaming: StateFlow<Boolean> = _isStreaming.asStateFlow()
+
+    private val _isAudioMuted: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val isAudioMuted: StateFlow<Boolean> = _isAudioMuted.asStateFlow()
 
     private val streamingEventMutableSharedFlow: MutableSharedFlow<StreamingEvent> =
         MutableSharedFlow(replay = 10, onBufferOverflow = BufferOverflow.DROP_OLDEST)
@@ -101,11 +113,27 @@ class MainViewModel(
 
         val angle = Angle()
         val camera2Source = Camera2Source(application)
+        val isInitiallyMuted = _isAudioMuted.value
+        val audioSource = when (micMode) {
+            MicMode.ANDROID -> createMicrophoneSource(isInitiallyMuted)
+
+            MicMode.THINKLET_5 -> createThinkletMicrophoneSource(
+                application,
+                MultiChannelAudioRecord.Channel.CHANNEL_FIVE,
+                isInitiallyMuted
+            )
+
+            MicMode.THINKLET_6 -> createThinkletMicrophoneSource(
+                application,
+                MultiChannelAudioRecord.Channel.CHANNEL_SIX,
+                isInitiallyMuted
+            )
+        }
         val localStream = stream ?: GenericStream(
             application,
             ConnectionCheckerImpl(streamingEventMutableSharedFlow),
             camera2Source,
-            MicrophoneSource()
+            audioSource
         ).apply {
             getGlInterface().autoHandleOrientation = false
             if (angle.isLandscape()) {
@@ -127,8 +155,9 @@ class MainViewModel(
             )
             val isAudioPrepared = localStream.prepareAudio(
                 sampleRate = audioSampleRateHz,
-                isStereo = true,
-                bitrate = audioBitrateBps
+                isStereo = audioChannel == AudioChannel.STEREO,
+                bitrate = audioBitrateBps,
+                echoCanceler = isEchoCancelerEnabled
             )
             isVideoPrepared && isAudioPrepared
         } catch (e: IllegalArgumentException) {
@@ -140,6 +169,26 @@ class MainViewModel(
         } else {
             _isPrepared.value = false
         }
+    }
+
+    private fun createMicrophoneSource(isInitiallyMuted: Boolean): MicrophoneSource {
+        val microphoneSource = MicrophoneSource()
+        if (isInitiallyMuted) {
+            microphoneSource.mute()
+        }
+        return microphoneSource
+    }
+
+    private fun createThinkletMicrophoneSource(
+        context: Context,
+        inputChannel: MultiChannelAudioRecord.Channel,
+        isInitiallyMuted: Boolean
+    ): ThinkletMicrophoneSource {
+        val microphoneSource = ThinkletMicrophoneSource(context, inputChannel)
+        if (isInitiallyMuted) {
+            microphoneSource.mute()
+        }
+        return microphoneSource
     }
 
     fun maybeStartStreaming(): Boolean {
@@ -191,6 +240,24 @@ class MainViewModel(
         }
     }
 
+    fun muteAudio() {
+        _isAudioMuted.value = true
+        val audioSource = stream?.audioSource ?: return
+        when (audioSource) {
+            is ThinkletMicrophoneSource -> audioSource.mute()
+            is MicrophoneSource -> audioSource.mute()
+        }
+    }
+
+    fun unMuteAudio() {
+        _isAudioMuted.value = false
+        val audioSource = stream?.audioSource ?: return
+        when (audioSource) {
+            is ThinkletMicrophoneSource -> audioSource.unMute()
+            is MicrophoneSource -> audioSource.unMute()
+        }
+    }
+
     private class ConnectionCheckerImpl(
         private val streamingEventMutableSharedFlow: MutableSharedFlow<StreamingEvent>
     ) : ConnectChecker {
@@ -237,9 +304,30 @@ class MainViewModel(
         }
     }
 
+    enum class AudioChannel(val argumentValue: String) {
+        MONAURAL("monaural"), STEREO("stereo");
+
+        companion object {
+            fun fromArgumentValue(value: String?): AudioChannel? =
+                entries.find { it.argumentValue == value }
+        }
+    }
+
+    enum class MicMode(val argumentValue: String) {
+        ANDROID("android"),
+        THINKLET_5("thinklet5"),
+        THINKLET_6("thinklet6"),
+        ;
+
+        companion object {
+            fun fromArgumentValue(value: String?): MicMode? =
+                entries.find { it.argumentValue == value }
+        }
+    }
+
     companion object {
         private const val DEFAULT_VIDEO_BITRATE_BPS = 4 * 1024 * 1024 // 4Mbps
-        private const val DEFAULT_AUDIO_SAMPLING_RATE_HZ = 44100 // 44.1kHz
+        private const val DEFAULT_AUDIO_SAMPLING_RATE_HZ = 48000 // 48kHz
         private const val DEFAULT_AUDIO_BITRATE_BPS = 128 * 1024 // 128kbps
 
         private const val STREAMING_EVENT_BUFFER_SIZE = 15
