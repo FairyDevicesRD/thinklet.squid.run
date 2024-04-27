@@ -82,12 +82,12 @@ adb shell am start \
     -a android.intent.action.MAIN \
     -e streamUrl "rtmp://example.com/live" \
     -e streamKey "stream_key" \
-    -ei longSide 720 \
-    -ei shortSide 480 \
-    -ei videoBitrate 4096 \
-    -ei audioSampleRate 44100 \
-    -ei audioBitrate 128 \
-    -ez preview true
+    --ei longSide 720 \
+    --ei shortSide 480 \
+    --ei videoBitrate 4096 \
+    --ei audioSampleRate 44100 \
+    --ei audioBitrate 128 \
+    --ez preview true
 ```
 
 ## ビルド
