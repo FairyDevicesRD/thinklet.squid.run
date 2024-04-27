@@ -123,7 +123,7 @@ YouTube Liveなどの外部サービスを使用することもできますが�
 ここでは、[MediaMTX](https://github.com/bluenviron/mediamtx) を使用してRTMPサーバーを構築します。
 リリースページより、サーバーを動かす環境に合った最新のリリースをダウンロードしてください。
 このドキュメントでは、Apple Silicon版のmacOSをRTMPサーバとして使用する場合を紹介します。
-※MediaMTXを実行しているマシンとLINKLETは同じネットワークに接続する必要があります。
+※MediaMTXを実行しているマシンとTHINKLETは同じネットワークに接続する必要があります。
 
 1. ダウンロードした.tar.gzファイルを解凍します。
 2. 解凍したフォルダをターミナルで開き、`mediamtx` を実行します。
