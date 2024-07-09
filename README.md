@@ -95,7 +95,7 @@ adb shell am start \
 ### セットアップ
 
 #### GitHub Packagesのセットアップ
-[THINKLET App SDK](https://github.com/FairyDevicesRD/thinklet.app.sdk)を使用しているため、配布先であるGitHub Packagesにアクセス可能にするための準備をが必要です。
+[THINKLET App SDK](https://github.com/FairyDevicesRD/thinklet.app.sdk)を使用しているため、配布先であるGitHub Packagesにアクセス可能にするための準備が必要です。
 
 [スタートガイド](https://fairydevicesrd.github.io/thinklet.app.developer/docs/startGuide/buildMultiMic) の `THINKLET App SDK の導入` の項目を行い、新規作成した `github.properties` ファイルに `username` および `token` を設定してください。
 
