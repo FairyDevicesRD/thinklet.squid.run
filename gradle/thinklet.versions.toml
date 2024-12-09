@@ -1,8 +1,8 @@
 [versions]
-sdk-audio = "0.1.2"
-sdk-gesture = "0.1.2"
-sdk-led = "0.1.2"
-sdk-maintenance = "0.1.2"
+sdk-audio = "0.1.6"
+sdk-gesture = "0.1.6"
+sdk-led = "0.1.6"
+sdk-maintenance = "0.1.6"
 
 [libraries]
 sdk-audio = { group = "ai.fd.thinklet", name = "sdk-audio", version.ref = "sdk-audio" }
